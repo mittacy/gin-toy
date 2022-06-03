@@ -7,7 +7,7 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	Init(WithTimeFormat("2006-01-02 15:04:05"))
+	Init(WithTimeFormat("2006-01-02 15:04:05"), WithLevel(DebugLevel))
 
 	Debug("this is SugarDebug")
 	Info("this is SugarInfo")
@@ -34,7 +34,7 @@ func TestConf(t *testing.T) {
 	bizLog := New("file",
 		WithPath("./storage/logs"),
 		WithTimeFormat("2006-01-02 15:04:05"),
-		WithLevel(zapcore.InfoLevel),
+		WithLevel(InfoLevel),
 		WithPreName("biz_"),
 		WithEncoderJSON(false),
 		WithFields(field))
@@ -63,7 +63,7 @@ func TestDefault(t *testing.T) {
 	}
 	SetDefaultConf(WithPath("./storage/logs"),
 		WithTimeFormat("2006-01-02 15:04:05"),
-		WithLevel(zapcore.InfoLevel),
+		WithLevel(InfoLevel),
 		WithPreName("global_"),
 		WithEncoderJSON(false),
 		WithFields(field))

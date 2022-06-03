@@ -130,7 +130,7 @@ func newWithConf(conf Conf) *Logger {
 
 func getWriter(fileName string) io.Writer {
 	path := fileName + ".log"
-	file, err := os.OpenFile(path, os.O_APPEND, 0666)
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, os.ModeAppend)
 	// 不存在创建文件
 	if err != nil && errors.Is(err, os.ErrNotExist) {
 		if file, err = os.Create(path); err != nil {

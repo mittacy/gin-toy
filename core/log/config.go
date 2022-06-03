@@ -60,11 +60,31 @@ func WithPath(path string) ConfigOption {
 	}
 }
 
+const (
+	DebugLevel = "debug"
+	InfoLevel  = "info"
+	WarnLevel  = "warn"
+	ErrorLevel = "error"
+)
+
 // WithLevel 设置服务记录的最低日志级别
 // 修改后，新建的日志将会是新配置，已经建立的日志配置不变
-// @param l 日志级别(-1:debug、0:info、1:warn、2:error)
-func WithLevel(l zapcore.Level) ConfigOption {
+// @param l 日志级别(debug、info、warn、error)
+func WithLevel(level string) ConfigOption {
 	return func(conf *Conf) {
+		var l zapcore.Level
+		switch level {
+		case DebugLevel:
+			l = zapcore.DebugLevel
+		case InfoLevel:
+			l = zapcore.InfoLevel
+		case WarnLevel:
+			l = zapcore.WarnLevel
+		case ErrorLevel:
+			l = zapcore.ErrorLevel
+		default:
+			panic("log level error")
+		}
 		conf.LowLevel = l
 	}
 }
