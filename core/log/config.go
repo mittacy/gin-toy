@@ -19,7 +19,8 @@ func RequestIdKey() string {
 
 // RequestIdVal 获取请求日志id值
 func RequestIdVal(c context.Context) string {
-	if v, ok := c.Value(RequestIdKey).(string); ok {
+	v, ok := c.Value(requestIdKey).(string)
+	if ok {
 		return v
 	}
 	return ""
