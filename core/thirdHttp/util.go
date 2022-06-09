@@ -14,7 +14,7 @@ func fullUrl(host, uri string) string {
 	return host + "/" + uri
 }
 
-func toTimeHookFunc(timeFormat ...string) mapstructure.DecodeHookFunc {
+func ToTimeHookFunc(timeFormat ...string) mapstructure.DecodeHookFunc {
 	return func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
 		if t != reflect.TypeOf(time.Time{}) {
 			return data, nil

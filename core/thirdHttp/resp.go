@@ -47,7 +47,7 @@ func (r *Reply) UnmarshalData(result interface{}) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		Metadata: nil,
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
-			toTimeHookFunc(r.timeFormats...)),
+			ToTimeHookFunc(r.timeFormats...)),
 		Result: result,
 	})
 	if err != nil {
