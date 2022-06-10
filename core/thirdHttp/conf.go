@@ -18,7 +18,7 @@ func NewClient(host string, options ...ClientOption) *Client {
 		logName: "thirdHttp",
 		host:    host,
 		timeout: time.Second * 5,
-		reply:   NewReply(),
+		reply:   defaultReply,
 	}
 
 	for _, option := range options {
@@ -53,14 +53,9 @@ func WithReply(reply IReply) ClientOption {
 	}
 }
 
-func (ctl *Client) Host() string {
-	return ctl.host
-}
+var defaultReply = NewReply()
 
-func (ctl *Client) Log() *log.Logger {
-	return ctl.log
-}
-
-func (ctl *Client) Timeout() time.Duration {
-	return ctl.timeout
+// SetDefaultReply 设置默认的全局响应体，影响全局
+func SetDefaultReply(reply IReply) {
+	defaultReply = reply
 }

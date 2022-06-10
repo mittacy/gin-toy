@@ -49,6 +49,15 @@ func startHttpAndLog() {
 		log.WithDistinguish(true))
 
 	r := gin.New()
+	r.GET("/index", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"name":      "mittacy",
+			"age":       12,
+			"code":      "success",
+			"short_msg": "meddle with sth",
+			"id":        c.Query("id"),
+		})
+	})
 	r.GET("/students", func(c *gin.Context) {
 		students := []Student{
 			{"mittacy", 11},
@@ -79,17 +88,6 @@ func startHttpAndLog() {
 	r.POST("/change", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"code": 0, "msg": "success", "data": "success"})
 	})
-	r.GET("/students_custom", func(c *gin.Context) {
-		students := []Student{
-			{"mittacy", 11},
-			{"lise", 12},
-			{"mick", 14},
-			{"neo", 10},
-			{"jack", 15},
-		}
-
-		c.JSON(http.StatusOK, gin.H{"code": "success", "msg": "success", "data": students})
-	})
 
 	r.Run(":10110")
 }
@@ -105,7 +103,7 @@ func TestGetObject(t *testing.T) {
 		List  []Student `mapstructure:"list"`
 		Total int       `mapstructure:"total"`
 	}{}
-	if err := client.Get(c, "/students_total", &res); err != nil {
+	if _, err := client.Get(c, "/students_total", &res); err != nil {
 		t.Errorf("get err: %+v", err)
 	}
 
@@ -120,7 +118,7 @@ func TestGetArr(t *testing.T) {
 	client := NewClient("http://127.0.0.1:10110")
 
 	var res []Student
-	if err := client.Get(c, "/students", &res); err != nil {
+	if _, err := client.Get(c, "/students", &res); err != nil {
 		t.Errorf("get err: %+v", err)
 	}
 
@@ -142,7 +140,7 @@ func TestGetParams(t *testing.T) {
 	params := map[string]string{
 		"key": "hhhh",
 	}
-	if err := client.GetParams(c, "/students_total", params, &res); err != nil {
+	if _, err := client.GetParams(c, "/students_total", params, &res); err != nil {
 		t.Errorf("get err: %+v", err)
 	}
 
@@ -157,7 +155,7 @@ func TestPost(t *testing.T) {
 	client := NewClient("http://127.0.0.1:10110")
 
 	var res string
-	if err := client.Post(c, "/change", nil, &res); err != nil {
+	if _, err := client.Post(c, "/change", nil, &res); err != nil {
 		t.Errorf("get err: %+v", err)
 	}
 
@@ -175,7 +173,7 @@ func TestConfig(t *testing.T) {
 		List  []Student `mapstructure:"list"`
 		Total int       `mapstructure:"total"`
 	}{}
-	if err := client.Get(c, "/students_total", &res); err != nil {
+	if _, err := client.Get(c, "/students_total", &res); err != nil {
 		t.Errorf("get err: %+v", err)
 	}
 
@@ -187,10 +185,27 @@ func TestCustomReply(t *testing.T) {
 
 	c := &gin.Context{}
 	c.Set(log.RequestIdKey(), "r_custom_reply")
-	client := NewClient("http://127.0.0.1:10110", WithReply(&customReply{}))
+	var res customReply
+	client := NewClient("http://127.0.0.1:10110", WithReply(&res))
 
-	var res []Student
-	if err := client.Get(c, "/students_custom", &res); err != nil {
+	if _, err := client.Get(c, "/index", &res); err != nil {
+		t.Errorf("get err: %+v", err)
+	}
+
+	t.Log(res)
+}
+
+func TestDefaultReply(t *testing.T) {
+	go startOnce.Do(startHttpAndLog)
+
+	SetDefaultReply(&customReply{})
+
+	c := &gin.Context{}
+	c.Set(log.RequestIdKey(), "r_custom_reply")
+	var res customReply
+	client := NewClient("http://127.0.0.1:10110")
+
+	if _, err := client.Get(c, "/index", &res); err != nil {
 		t.Errorf("get err: %+v", err)
 	}
 
@@ -198,22 +213,23 @@ func TestCustomReply(t *testing.T) {
 }
 
 type customReply struct {
-	Code string
-	Msg  string
-	Data interface{}
+	Name     string `json:"name"`
+	Age      int    `json:"age"`
+	Code     string `json:"code"`
+	ShortMsg string `json:"short_msg"`
 }
 
-func (r *customReply) GetCode() interface{} {
-	return r.Code
+func (r *customReply) GetCode() int {
+	return 0
 }
-func (r *customReply) GetMsg() interface{} {
-	return r.Msg
+func (r *customReply) GetMsg() string {
+	return r.ShortMsg
 }
-func (r *customReply) GetData() interface{} {
-	return r.Data
+func (r *customReply) GetUnknownCode() int {
+	return 500
 }
 func (r *customReply) IsSuccess() bool {
-	return r.Code == "success"
+	return true
 }
 func (r *customReply) UnmarshalData(result interface{}) error {
 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
@@ -226,7 +242,7 @@ func (r *customReply) UnmarshalData(result interface{}) error {
 		return err
 	}
 
-	if err := decoder.Decode(r.Data); err != nil {
+	if err := decoder.Decode(r); err != nil {
 		return err
 	}
 	return err
