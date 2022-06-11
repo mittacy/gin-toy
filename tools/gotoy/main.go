@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/mittacy/gin-toy/tools/gotoy/internal/project"
+	"github.com/mittacy/gin-toy/tools/gotoy/internal/tpl"
 	"github.com/spf13/cobra"
 	"log"
 )
@@ -17,6 +18,7 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(project.CmdNew)
+	rootCmd.AddCommand(tpl.CmdTpl)
 }
 
 func main() {

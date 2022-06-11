@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fatih/color"
-	"github.com/mittacy/gin-toy/tools/gotoy/base"
+	base2 "github.com/mittacy/gin-toy/tools/gotoy/internal/base"
 	"os"
 	"path"
 )
@@ -40,7 +40,7 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 
 	fmt.Printf("🚀 Creating service %s, layout repo is %s, please wait a moment.\n\n", p.Name, layout)
 
-	repo := base.NewRepo(layout, branch)
+	repo := base2.NewRepo(layout, branch)
 
 	if err := repo.CopyTo(ctx, to, p.Path, []string{".git", ".github"}); err != nil {
 		return err
@@ -50,19 +50,19 @@ func (p *Project) New(ctx context.Context, dir string, layout string, branch str
 		path.Join(to, "cmd", "server"),
 		path.Join(to, "cmd", p.Name),
 	)
-	base.Tree(to, dir)
+	base2.Tree(to, dir)
 
 	fmt.Printf("\n🍺 Project creation succeeded %s\n", color.GreenString(p.Name))
 
 	fmt.Printf("Wait a moment, the program is in the final configuration work\n")
 
 	// 替换项目中的字符串
-	base.Replace(to, replaceStr, p.Name)
+	base2.Replace(to, replaceStr, p.Name)
 
 	// 复制配置文件
 	developEnv := fmt.Sprintf("%s/.env.development", to)
 	localEnv := fmt.Sprintf("%s/.env", to)
-	_ = base.Copy(localEnv, developEnv)
+	_ = base2.Copy(localEnv, developEnv)
 
 	fmt.Print("💻 Use the following command to start the project 👇:\n\n")
 
