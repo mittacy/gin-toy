@@ -59,10 +59,10 @@ type EGorm struct {
 
 // GDB 获取DB连接
 func (ctl *EGorm) GDB() *gorm.DB {
-	return GetClient(ctl.ConfName)
+	return GetConnect(ctl.ConfName)
 }
 
-func GetClient(name string) *gorm.DB {
+func GetConnect(name string) *gorm.DB {
 	if !initFlag {
 		panic(ErrNoInit)
 	}
@@ -73,12 +73,12 @@ func GetClient(name string) *gorm.DB {
 
 	conf, isExist := connectConf[name]
 	if !isExist {
-		panic(name + "配置不存在, 请检查配置")
+		panic("eGorm: " + name + "配置不存在, 请检查配置")
 	}
 
 	db, err := GetConnectByConf(conf)
 	if err != nil {
-		l.Error(context.Background(), fmt.Sprintf("连接数据库失败, conf: %+v, err: %+v", conf, err))
+		l.Error(context.Background(), fmt.Sprintf("eGorm: 连接数据库失败, conf: %+v, err: %+v", conf, err))
 		return &gorm.DB{}
 	}
 	connectPool[name] = db

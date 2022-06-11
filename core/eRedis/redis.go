@@ -81,7 +81,7 @@ func GetClient(name string, defaultDB int) *redis.Client {
 
 	conf, isExist := connectConf[name]
 	if !isExist {
-		panic(name + " 配置不存在, 请检查连接配置")
+		panic("eRedis: " + name + " 配置不存在, 请检查连接配置")
 	}
 
 	db, err := GetClientByConf(conf, defaultDB)
