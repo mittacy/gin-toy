@@ -36,8 +36,8 @@ func FailErr(c *gin.Context, err error) {
 	Custom(c, http.StatusOK, bizerr.Code(err), err.Error(), NilData)
 }
 
-// FailCheckBizErr 检查错误是否为指定的业务错误，否则记录日志并响应
-func FailCheckBizErr(c *gin.Context, title string, sourceErr error, possibleErrs ...error) {
+// FailCheckTargetErr 检查错误是否为指定的错误，否则记录日志并响应
+func FailCheckTargetErr(c *gin.Context, title string, sourceErr error, possibleErrs ...error) {
 	for _, v := range possibleErrs {
 		if bizerr.Is(sourceErr, v) {
 			Custom(c, http.StatusOK, bizerr.Code(v), v.Error(), NilData)
@@ -49,8 +49,19 @@ func FailCheckBizErr(c *gin.Context, title string, sourceErr error, possibleErrs
 	return
 }
 
+// FailCheckBizErr 检查错误是否为业务错误，否则记录日志并响应未知
+func FailCheckBizErr(c *gin.Context, title string, err error) {
+	if bizerr.IsBizErr(err) {
+		Custom(c, http.StatusOK, bizerr.Code(err), err.Error(), NilData)
+		return
+	}
+
+	Unknown(c, errors.WithMessage(err, title))
+	return
+}
+
 func Unknown(c *gin.Context, err error) {
-	log.ErrorfWithTrace(c, "err: %+v", err)
+	log.ErrorwWithTrace(c, "unknown", "err", err)
 	code := bizerr.Unknown.Code
 	msg := bizerr.Unknown.Error()
 
