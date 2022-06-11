@@ -57,9 +57,9 @@ var (
 	connectPool map[string]*gorm.DB     // 连接单例池
 )
 
-func Init(c map[string]MultipleConf) {
+func Init(c map[string]MultipleConf, logOptions ...GormConfigOption) {
 	initConf(c)
-	initLog()
+	initLog(logOptions...)
 	connectPool = make(map[string]*gorm.DB, 0)
 	initFlag = true
 }
