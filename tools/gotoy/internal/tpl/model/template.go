@@ -11,14 +11,14 @@ var modelTemplate = `
 package model
 
 const (
-	ExampleIsDeletedNo  = 0
-	ExampleIsDeletedYes = 1
+	{{ .Name }}IsDeletedNo  = 0
+	{{ .Name }}IsDeletedYes = 1
 )
 
-type Example struct {
+type {{ .Name }} struct {
 }
 
-func (*Example) TableName() string {
+func (*{{ .Name }}) TableName() string {
 	return "table_name"
 }
 

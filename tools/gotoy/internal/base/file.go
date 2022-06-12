@@ -31,6 +31,20 @@ func Replace(path, old, new string) {
 	}
 }
 
+//// GetTemplates 获取模板文件
+//// todo 从项目根目录获取 -> 从系统根目录获取 -> 服务默认
+//// @param name 模板名
+//// @return *template.Template
+//// @return error
+//func GetTemplates(name string) (*template.Template, error) {
+//	text, err := box.Box.String(name)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return template.New(name).Parse(text)
+//}
+
 // getAllFiles 获取路径下的所有文件名
 // @param path 路径
 // @return []string

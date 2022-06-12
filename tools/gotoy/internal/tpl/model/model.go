@@ -12,14 +12,14 @@ import (
 var CmdModel = &cobra.Command{
 	Use:   "model",
 	Short: "Generate the model template implementations",
-	Long:  "Generate the model template implementations. Example: gotoy tpl model xxx -t=app/model",
+	Long:  "Generate the model template implementations. Example: gotoy tpl model xxx -t=app",
 	Run:   run,
 }
 
 var targetDir string
 
 func init() {
-	CmdModel.Flags().StringVarP(&targetDir, "target-dir", "t", "app/model", "generate target directory")
+	CmdModel.Flags().StringVarP(&targetDir, "target-dir", "t", "app", "generate target directory")
 }
 
 func run(cmd *cobra.Command, args []string) {
@@ -29,17 +29,17 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	if _, err := os.Stat(targetDir); os.IsNotExist(err) {
-		fmt.Printf("Target directory: %s does not exist, example: gotoy tpl model xxx -t=app/model\n", targetDir)
+		fmt.Printf("Target directory: %s does not exist, example: gotoy tpl model xxx -t=app\n", targetDir)
 		return
 	}
 
-	AddModel(args[0])
+	AddModel(args[0], targetDir)
 
 	fmt.Println("success!")
 }
 
-func AddModel(name string) bool {
-	to := fmt.Sprintf("%s/%s.go", targetDir, name)
+func AddModel(name, dir string) bool {
+	to := fmt.Sprintf("%s/model/%s.go", dir, name)
 
 	if _, err := os.Stat(to); !os.IsNotExist(err) {
 		fmt.Fprintf(os.Stderr, "%s model already exists: %s\n", name, to)
