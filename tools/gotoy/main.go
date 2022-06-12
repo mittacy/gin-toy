@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-const version = "v0.0.1"
+const version = "v0.1.0"
 
 var rootCmd = &cobra.Command{
 	Use:     "gotoy",
