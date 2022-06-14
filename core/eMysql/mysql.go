@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	stackErrors "github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -64,12 +65,18 @@ func (ctl *EGorm) GDB() *gorm.DB {
 
 // Create 创建
 func (ctl *EGorm) Create(c context.Context, values interface{}) error {
-	return ctl.GDB().Create(values).Error
+	if err := ctl.GDB().Create(values).Error; err != nil {
+		return stackErrors.WithStack(err)
+	}
+	return nil
 }
 
 // Save 更新结构体指定id的所有字段
 func (ctl *EGorm) Save(c context.Context, values interface{}) error {
-	return ctl.GDB().Save(values).Error
+	if err := ctl.GDB().Save(values).Error; err != nil {
+		return stackErrors.WithStack(err)
+	}
+	return nil
 }
 
 const NotLimit = -1
@@ -92,7 +99,10 @@ func (ctl *EGorm) Updates(c context.Context, table string, where, noWhere, updat
 	}
 
 	res := dbCtl.Updates(updates)
-	return res.RowsAffected, res.Error
+	if res.Error != nil {
+		return res.RowsAffected, stackErrors.WithStack(res.Error)
+	}
+	return res.RowsAffected, nil
 }
 
 // First 查询
@@ -105,7 +115,14 @@ func (ctl *EGorm) First(c context.Context, where, noWhere map[string]interface{}
 		dbCtl = dbCtl.Not(where)
 	}
 
-	return dbCtl.First(result).Error
+	if err := dbCtl.First(result).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			result = nil
+			return nil
+		}
+		return stackErrors.WithStack(err)
+	}
+	return nil
 }
 
 func GetConnect(name string) *gorm.DB {
