@@ -61,6 +61,17 @@ func (r *ERedis) RDB() *redis.Client {
 	return GetClient(r.ConfName, r.DB)
 }
 
+func (r *ERedis) Del(c context.Context, keys ...string) error {
+	if len(keys) <= 0 {
+		return nil
+	}
+	if err := r.RDB().Del(c, keys...).Err(); err != nil {
+		l.ErrorwWithTrace(c, "删除缓存失败", "keys", keys, "err", err)
+		return err
+	}
+	return nil
+}
+
 // GetClient 获取redis客户端
 // @param name 配置名
 // @param defaultDB 默认数据库

@@ -62,6 +62,50 @@ func (ctl *EGorm) GDB() *gorm.DB {
 	return GetConnect(ctl.ConfName)
 }
 
+// Create 创建
+func (ctl *EGorm) Create(c context.Context, values interface{}) error {
+	return ctl.GDB().Create(values).Error
+}
+
+// Save 更新结构体指定id的所有字段
+func (ctl *EGorm) Save(c context.Context, values interface{}) error {
+	return ctl.GDB().Save(values).Error
+}
+
+// Updates 更新指定字段
+func (ctl *EGorm) Updates(c context.Context, table string, where, noWhere, updates map[string]interface{}, limit *int) (int64, error) {
+	if updates == nil || len(updates) == 0 {
+		return 0, nil
+	}
+
+	dbCtl := ctl.GDB().Table(table)
+	if where != nil && len(where) > 0 {
+		dbCtl = dbCtl.Where(where)
+	}
+	if noWhere != nil && len(noWhere) > 0 {
+		dbCtl = dbCtl.Not(where)
+	}
+	if limit != nil {
+		dbCtl = dbCtl.Limit(*limit)
+	}
+
+	res := dbCtl.Updates(updates)
+	return res.RowsAffected, res.Error
+}
+
+// First 查询
+func (ctl *EGorm) First(c context.Context, where, noWhere map[string]interface{}, result interface{}) error {
+	dbCtl := ctl.GDB()
+	if where != nil && len(where) > 0 {
+		dbCtl = dbCtl.Where(where)
+	}
+	if noWhere != nil && len(noWhere) > 0 {
+		dbCtl = dbCtl.Not(where)
+	}
+
+	return dbCtl.First(result).Error
+}
+
 func GetConnect(name string) *gorm.DB {
 	if !initFlag {
 		panic(ErrNoInit)
