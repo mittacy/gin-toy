@@ -72,8 +72,10 @@ func (ctl *EGorm) Save(c context.Context, values interface{}) error {
 	return ctl.GDB().Save(values).Error
 }
 
+const NotLimit = -1
+
 // Updates 更新指定字段
-func (ctl *EGorm) Updates(c context.Context, table string, where, noWhere, updates map[string]interface{}, limit *int) (int64, error) {
+func (ctl *EGorm) Updates(c context.Context, table string, where, noWhere, updates map[string]interface{}, limit int) (int64, error) {
 	if updates == nil || len(updates) == 0 {
 		return 0, nil
 	}
@@ -85,8 +87,8 @@ func (ctl *EGorm) Updates(c context.Context, table string, where, noWhere, updat
 	if noWhere != nil && len(noWhere) > 0 {
 		dbCtl = dbCtl.Not(where)
 	}
-	if limit != nil {
-		dbCtl = dbCtl.Limit(*limit)
+	if limit != NotLimit {
+		dbCtl = dbCtl.Limit(limit)
 	}
 
 	res := dbCtl.Updates(updates)
