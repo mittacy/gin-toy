@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/mittacy/gin-toy/core/bizerr"
 	stackErrors "github.com/pkg/errors"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -117,8 +118,7 @@ func (ctl *EGorm) First(c context.Context, where, noWhere map[string]interface{}
 
 	if err := dbCtl.First(result).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			result = nil
-			return nil
+			return bizerr.DBRecordNoFound
 		}
 		return stackErrors.WithStack(err)
 	}
