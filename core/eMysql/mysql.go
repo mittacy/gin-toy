@@ -105,6 +105,8 @@ func (ctl *EGorm) Updates(c context.Context, table string, where, noWhere, updat
 }
 
 // First 查询
+var DBRecordNoFound = &bizerr.BizErr{Code: 404, Msg: "record not found in database"}
+
 func (ctl *EGorm) First(c context.Context, where, noWhere map[string]interface{}, result interface{}) error {
 	dbCtl := ctl.GDB()
 	if where != nil && len(where) > 0 {
@@ -116,7 +118,7 @@ func (ctl *EGorm) First(c context.Context, where, noWhere map[string]interface{}
 
 	if err := dbCtl.First(result).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return bizerr.DBRecordNoFound
+			return DBRecordNoFound
 		}
 		return stackErrors.WithStack(err)
 	}
