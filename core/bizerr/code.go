@@ -9,7 +9,6 @@ var (
 	RestyHttp         = &BizErr{3, "http request the third party services error"}
 	Unauthorized      = &BizErr{401, "unauthorized"}
 	Forbidden         = &BizErr{401, "forbidden permissions"}
-	DBRecordNoFound   = &BizErr{404, "record not found in database"}
 	Unknown           = &BizErr{500, "unknown error"}
 )
 
