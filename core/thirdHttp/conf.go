@@ -10,7 +10,7 @@ type Client struct {
 	log     *log.Logger
 	host    string
 	timeout time.Duration
-	reply   IReply
+	reply   func() IReply
 }
 
 func NewClient(host string, options ...ClientOption) *Client {
@@ -49,13 +49,17 @@ func WithLogName(name string) ClientOption {
 // WithReply 自定义响应结构体, 默认为 {Code int, Msg string, Data interface{}}
 func WithReply(reply IReply) ClientOption {
 	return func(c *Client) {
-		c.reply = reply
+		c.reply = func() IReply {
+			return reply
+		}
 	}
 }
 
-var defaultReply = NewReply()
+var defaultReply = NewReply
 
 // SetDefaultReply 设置默认的全局响应体，影响全局
 func SetDefaultReply(reply IReply) {
-	defaultReply = reply
+	defaultReply = func() IReply {
+		return reply
+	}
 }

@@ -15,7 +15,7 @@ func (ctl *Client) Get(c context.Context, uri string, result interface{}) (int, 
 	url := fullUrl(ctl.host, uri)
 	client := resty.New().SetTimeout(ctl.timeout)
 
-	respData := ctl.reply
+	respData := ctl.reply()
 	respBody, err := client.R().SetResult(&respData).ForceContentType("application/json").Get(url)
 	if err != nil {
 		ctl.log.ErrorwWithTrace(c, url, "respBody", respBody, "err", err)
@@ -23,7 +23,7 @@ func (ctl *Client) Get(c context.Context, uri string, result interface{}) (int, 
 	}
 	defer respBody.RawBody().Close()
 
-	ctl.log.InfowWithTrace(c, url, "respBody", respBody, "respData", respData)
+	ctl.log.InfowWithTrace(c, url, "respBody", respBody)
 
 	// http请求是否成功
 	if !respBody.IsSuccess() {
@@ -53,7 +53,7 @@ func (ctl *Client) GetParams(c context.Context, uri string, params map[string]st
 	url := fullUrl(ctl.host, uri)
 	client := resty.New().SetTimeout(ctl.timeout)
 
-	respData := ctl.reply
+	respData := ctl.reply()
 	respBody, err := client.R().SetQueryParams(params).SetResult(&respData).ForceContentType("application/json").Get(url)
 	if err != nil {
 		ctl.log.ErrorwWithTrace(c, url, "params", params, "respBody", respBody, "err", err)
@@ -61,7 +61,7 @@ func (ctl *Client) GetParams(c context.Context, uri string, params map[string]st
 	}
 	defer respBody.RawBody().Close()
 
-	ctl.log.InfowWithTrace(c, url, "params", params, "respBody", respBody, "respData", respData)
+	ctl.log.InfowWithTrace(c, url, "params", params, "respBody", respBody)
 
 	// http请求是否成功
 	if !respBody.IsSuccess() {
@@ -91,7 +91,7 @@ func (ctl *Client) Post(c context.Context, uri string, body interface{}, result 
 	url := fullUrl(ctl.host, uri)
 	client := resty.New().SetTimeout(ctl.timeout)
 
-	respData := ctl.reply
+	respData := ctl.reply()
 	respBody, err := client.R().SetHeader("Content-Type", "application/json").SetBody(body).SetResult(&respData).Post(url)
 	if err != nil {
 		ctl.log.ErrorwWithTrace(c, url, "params", body, "respBody", respBody, "err", err)
@@ -99,7 +99,7 @@ func (ctl *Client) Post(c context.Context, uri string, body interface{}, result 
 	}
 	defer respBody.RawBody().Close()
 
-	ctl.log.InfowWithTrace(c, url, "params", body, "respBody", respBody, "respData", respData)
+	ctl.log.InfowWithTrace(c, url, "params", body, "respBody", respBody)
 
 	// http请求是否成功
 	if !respBody.IsSuccess() {
@@ -116,4 +116,81 @@ func (ctl *Client) Post(c context.Context, uri string, body interface{}, result 
 	}
 
 	return respData.GetCode(), respData.UnmarshalData(result)
+}
+
+// SimpleGet 简单请求，不处理结果
+// @param c
+// @param uri
+// @param result
+// @return error
+func (ctl *Client) SimpleGet(c context.Context, uri string, result interface{}) error {
+	url := fullUrl(ctl.host, uri)
+	client := resty.New().SetTimeout(ctl.timeout)
+
+	respBody, err := client.R().SetResult(result).ForceContentType("application/json").Get(url)
+	if err != nil {
+		ctl.log.ErrorwWithTrace(c, url, "respBody", respBody, "err", err)
+		return err
+	}
+	defer respBody.RawBody().Close()
+
+	ctl.log.InfowWithTrace(c, url, "respBody", respBody, "result", result)
+
+	if !respBody.IsSuccess() {
+		return errors.New(respBody.String())
+	}
+
+	return nil
+}
+
+// SimpleGetParams 简单带参数请求，不处理结果
+// @param c
+// @param uri
+// @param params
+// @param result
+// @return error
+func (ctl *Client) SimpleGetParams(c context.Context, uri string, params map[string]string, result interface{}) error {
+	url := fullUrl(ctl.host, uri)
+	client := resty.New().SetTimeout(ctl.timeout)
+
+	respBody, err := client.R().SetQueryParams(params).SetResult(result).ForceContentType("application/json").Get(url)
+	if err != nil {
+		ctl.log.ErrorwWithTrace(c, url, "params", params, "respBody", respBody, "err", err)
+		return err
+	}
+	defer respBody.RawBody().Close()
+
+	ctl.log.InfowWithTrace(c, url, "params", params, "respBody", respBody)
+
+	if !respBody.IsSuccess() {
+		return errors.New(respBody.String())
+	}
+
+	return nil
+}
+
+// SimplePost 简单请求，不处理结果
+// @param c
+// @param uri
+// @param body
+// @param result
+// @return error
+func (ctl *Client) SimplePost(c context.Context, uri string, body interface{}, result interface{}) error {
+	url := fullUrl(ctl.host, uri)
+	client := resty.New().SetTimeout(ctl.timeout)
+
+	respBody, err := client.R().SetHeader("Content-Type", "application/json").SetBody(body).SetResult(result).Post(url)
+	if err != nil {
+		ctl.log.ErrorwWithTrace(c, url, "params", body, "respBody", respBody, "err", err)
+		return err
+	}
+	defer respBody.RawBody().Close()
+
+	ctl.log.InfowWithTrace(c, url, "params", body, "respBody", result)
+
+	if !respBody.IsSuccess() {
+		return errors.New(respBody.String())
+	}
+
+	return nil
 }
