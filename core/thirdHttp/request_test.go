@@ -247,3 +247,67 @@ func (r *customReply) UnmarshalData(result interface{}) error {
 	}
 	return err
 }
+
+func TestConcurrency(t *testing.T) {
+	go startOnce.Do(startHttpAndLog)
+
+	c := &gin.Context{}
+	c.Set(log.RequestIdKey(), "r_testArr")
+	client := NewClient("http://127.0.0.1:10110")
+
+	for i := 0; i < 10; i++ {
+		go func() {
+			var r []Student
+			if _, err := client.Get(c, "/students", &r); err != nil {
+				t.Errorf("get err: %+v", err)
+			}
+			t.Log(r)
+		}()
+	}
+
+	time.Sleep(time.Second * 2)
+}
+
+func TestSimpleGet(t *testing.T) {
+	go startOnce.Do(startHttpAndLog)
+
+	c := &gin.Context{}
+	c.Set(log.RequestIdKey(), "r_simple_get")
+	client := NewClient("http://127.0.0.1:10110")
+
+	res := struct {
+		Name     string `json:"name"`
+		Age      int    `json:"age"`
+		Code     string `json:"code"`
+		ShortMsg string `json:"short_msg"`
+	}{}
+	if err := client.SimpleGet(c, "/index", &res); err != nil {
+		t.Errorf("get err: %+v", err)
+	}
+
+	t.Logf("%+v", res)
+}
+
+func TestSimpleGetParams(t *testing.T) {
+	go startOnce.Do(startHttpAndLog)
+
+	c := &gin.Context{}
+	c.Set(log.RequestIdKey(), "r_simple_get_params")
+	client := NewClient("http://127.0.0.1:10110")
+
+	res := struct {
+		Name     string `json:"name"`
+		Age      int    `json:"age"`
+		Code     string `json:"code"`
+		ShortMsg string `json:"short_msg"`
+		Id       string `json:"id"`
+	}{}
+	params := map[string]string{
+		"id": "12",
+	}
+	if err := client.SimpleGetParams(c, "/index", params, &res); err != nil {
+		t.Errorf("get err: %+v", err)
+	}
+
+	t.Logf("%+v", res)
+}
